@@ -1,0 +1,1 @@
+# awsdoc-ja-search
