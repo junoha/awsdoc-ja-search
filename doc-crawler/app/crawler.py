@@ -29,6 +29,7 @@ async def fetch(url, session):
     """
     Get HTML
     """
+    await asyncio.sleep(2)
     try:
         response = await session.get(url)
         logger.debug("  GET -> {}".format(url))
@@ -39,10 +40,9 @@ async def fetch(url, session):
             "html": await response.text(),
         }
         return doc_json
-    except aiohttp.InvalidURL as e:
-        logger.warn(e)
-    except aiohttp.ServerDisconnectedError as e:
-        logger.warn(e)
+    except (aiohttp.InvalidURL, aiohttp.ServerDisconnectedError) as e:
+        logger.error("Error while GET {}".format(url))
+        logger.exception("Error while GET", exc_info=e)
 
 
 async def bound_fetch(url, session, sem):
@@ -59,7 +59,7 @@ async def get_doc_by_service(urls):
     """
     tasks = []
     sem = asyncio.Semaphore(SEMAPHORE)
-    async with ClientSession() as session:
+    async with aiohttp.ClientSession() as session:
         for url in urls:
             task = bound_fetch(url, session, sem)
             tasks.append(task)
@@ -71,13 +71,10 @@ def get_all_docs(sitemap_urls):
     """
     Get all AWS documents(ja)
     """
-    sitemap_count = len(sitemap_urls)
-    idx = 0
+    remain_count = len(sitemap_urls)
     for service_sitemap_url in sitemap_urls:
         logger.info(
-            "({0}/{1}) {2}".format(
-                sitemap_count, len(sitemap_urls), service_sitemap_url
-            )
+            "({0}/{1}) {2}".format(remain_count, len(sitemap_urls), service_sitemap_url)
         )
 
         service_sitemap = requests.get(service_sitemap_url)
@@ -86,15 +83,16 @@ def get_all_docs(sitemap_urls):
 
         logger.info("Documents in service: {}".format(len(service_urls)))
 
-        # Get HTMLs in parallel`by asyncio
-        done, pending = asyncio.run(get_doc_by_service(service_urls))
+        # Get HTMLs in parallel by asyncio
+        done, _ = asyncio.run(get_doc_by_service(service_urls))
 
         # write file
-        with jsonlines.open("./html/html_{}.jsonl".format(idx), mode="w") as f:
+        with jsonlines.open(
+            "./html/html_{}.jsonl".format(len(sitemap_urls) - remain_count), mode="w"
+        ) as f:
             f.write_all([d.result() for d in done])
 
-        sitemap_count -= 1
-        idx += 1
+        remain_count -= 1
 
 
 def init_log():
