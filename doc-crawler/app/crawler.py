@@ -31,8 +31,9 @@ async def fetch(url, session):
     """
     await asyncio.sleep(2)
     try:
-        response = await session.get(url)
         logger.debug("  GET -> {}".format(url))
+
+        response = await session.get(url)
         doc_json = {
             "url": url,
             "last_modified": to_isoformat(response.headers["Last-Modified"]),
@@ -45,11 +46,13 @@ async def fetch(url, session):
         logger.exception("Error while GET", exc_info=e)
 
 
-async def bound_fetch(url, session, sem):
+async def burst_fetch(url, session, sem):
     """
     Get HTML with semaphore
     """
+    logger.debug("=== burst_fetch")
     async with sem:
+        logger.debug("==== call fetch")
         return await fetch(url, session)
 
 
@@ -61,7 +64,7 @@ async def get_doc_by_service(urls):
     sem = asyncio.Semaphore(SEMAPHORE)
     async with aiohttp.ClientSession() as session:
         for url in urls:
-            task = bound_fetch(url, session, sem)
+            task = burst_fetch(url, session, sem)
             tasks.append(task)
 
         return await asyncio.wait(tasks)
