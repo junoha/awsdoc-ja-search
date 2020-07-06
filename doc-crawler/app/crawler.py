@@ -38,12 +38,20 @@ async def fetch(url, session):
             "url": url,
             "last_modified": to_isoformat(response.headers["Last-Modified"]),
             "crawled_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-            "html": await response.text(),
+            "html": await response.text('utf-8'),
         }
         return doc_json
-    except (aiohttp.InvalidURL, aiohttp.ServerDisconnectedError) as e:
+    except Exception as e:
         logger.error("Error while GET {}".format(url))
         logger.exception("Error while GET", exc_info=e)
+        doc_json = {
+            "url": url,
+            "last_modified": None,
+            "crawled_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "html": None,
+            "exception": e
+        }
+        return doc_json
 
 
 async def burst_fetch(url, session, sem):
