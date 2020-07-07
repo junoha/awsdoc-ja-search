@@ -1,15 +1,15 @@
-import requests
-import aiohttp
-import xml.etree.ElementTree as ET
-import jsonlines
-
 import asyncio
 from datetime import datetime, timezone
 import json
 import logging
 import os
 
-from s3util import test
+import requests
+import aiohttp
+import xml.etree.ElementTree as ET
+import jsonlines
+
+import s3util
 from helper import calc_time, to_isoformat
 
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -38,7 +38,7 @@ async def fetch(url, session):
             "url": url,
             "last_modified": to_isoformat(response.headers["Last-Modified"]),
             "crawled_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-            "html": await response.text('utf-8'),
+            "html": await response.text("utf-8"),
         }
         return doc_json
     except Exception as e:
@@ -49,7 +49,7 @@ async def fetch(url, session):
             "last_modified": None,
             "crawled_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
             "html": None,
-            "exception": e
+            "exception": e,
         }
         return doc_json
 
