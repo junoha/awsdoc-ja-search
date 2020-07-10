@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import json
 import logging
 import os
+import traceback
 
 import requests
 import aiohttp
@@ -30,27 +31,45 @@ async def fetch(url, session):
     Get HTML
     """
     await asyncio.sleep(2)
+    doc_json = {}
+
     try:
         logger.debug("  GET -> {}".format(url))
 
         response = await session.get(url)
-        doc_json = {
-            "url": url,
-            "last_modified": to_isoformat(response.headers["Last-Modified"]),
-            "crawled_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-            "html": await response.text("utf-8"),
-        }
-        return doc_json
-    except Exception as e:
+        if response.status == 200:
+            doc_json = {
+                "url": url,
+                "status": response.status,
+                "last_modified": to_isoformat(response.headers["Last-Modified"]),
+                "crawled_at": datetime.now(timezone.utc)
+                .replace(microsecond=0)
+                .isoformat(),
+                "html": await response.text("utf-8"),
+            }
+        else:
+            doc_json = {
+                "url": url,
+                "status": response.status,
+                "last_modified": None,
+                "crawled_at": datetime.now(timezone.utc)
+                .replace(microsecond=0)
+                .isoformat(),
+                "html": None,
+            }
+    except Exception:
+        trace = traceback.format_exc()
         logger.error("Error while GET {}".format(url))
-        logger.exception("Error while GET", exc_info=e)
+        logger.exception(trace)
         doc_json = {
             "url": url,
+            "status": None,
             "last_modified": None,
             "crawled_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
             "html": None,
-            "exception": e,
+            "exception": trace,
         }
+    finally:
         return doc_json
 
 
@@ -92,16 +111,37 @@ def get_all_docs(sitemap_urls):
         service_root = ET.fromstring(service_sitemap.text.encode("utf-8"))
         service_urls = [child[0].text.strip() for child in service_root]
 
-        logger.info("Documents in service: {}".format(len(service_urls)))
+        # crawl only docs.aws.amazon.com
+        filtered_service_urls = list(
+            filter(lambda url: "docs.aws.amazon.com" in url, service_urls)
+        )
+        if len(filtered_service_urls) == 0:
+            logger.info("No doc in docs.aws.amazon.com. skipping...")
+            continue
 
+        logger.info("Documents in service: {}".format(len(filtered_service_urls)))
+        
         # Get HTMLs in parallel by asyncio
-        done, _ = asyncio.run(get_doc_by_service(service_urls))
+        done, _ = asyncio.run(get_doc_by_service(filtered_service_urls))
 
-        # write file
-        with jsonlines.open(
-            "./html/html_{}.jsonl".format(len(sitemap_urls) - remain_count), mode="w"
-        ) as f:
-            f.write_all([d.result() for d in done])
+        key = "{}/crawled-html-{}.jsonl.gz".format(
+            PREFIX, len(sitemap_urls) - remain_count
+        )
+        # UTF-8 encoded bytes of jsonl with "\n"
+
+        try:
+            jsonl_bytes = "\n".join([json.dumps(d.result()) for d in done]).encode(
+                "utf-8"
+            )
+            s3util.upload_file(BUCKET, key, jsonl_bytes)
+        except Exception as e:
+            logger.exception("Error while s3 upload", exc_info=e)
+    
+        # # write file
+        # with jsonlines.open(
+        #     "./html/html_{}.jsonl".format(len(sitemap_urls) - remain_count), mode="w"
+        # ) as f:
+        #     f.write_all([d.result() for d in done])
 
         remain_count -= 1
 
