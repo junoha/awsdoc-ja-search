@@ -17,7 +17,7 @@ TODO
 
 ### Prerequisites
 
-TIDO
+TODO
 
 ```
 Give examples
