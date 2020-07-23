@@ -5,10 +5,12 @@ import {
   Hits,
   SearchBox,
   Pagination,
-  Highlight,
+  ClearRefinements,
+  RefinementList,
+  Configure,
 } from 'react-instantsearch-dom';
-import PropTypes from 'prop-types';
 import './App.css';
+import Hit from './components/Hit';
 
 // Get env val from .env
 const searchClient = algoliasearch(
@@ -34,18 +36,29 @@ class App extends Component {
 
         <div className="container">
           <InstantSearch searchClient={searchClient} indexName={process.env.REACT_APP_ALGOLIA_INDEX_NAME}>
-            <div className="search-panel">
-              <div className="search-panel__results">
-                <SearchBox
-                  className="searchbox"
-                  translations={{
-                    placeholder: '',
-                  }}
-                />
-                <Hits hitComponent={Hit} />
-
-                <div className="pagination">
-                  <Pagination />
+            <div className="left-panel">
+              <ClearRefinements />
+              <h2>Product</h2>
+              <RefinementList attribute="product" showMore={true} showMoreLimit={30} />
+              <h2>Guide</h2>
+              <RefinementList attribute="guide" showMore={true} showMoreLimit={20} />
+              <Configure hitsPerPage={10} />
+            </div>
+            <div className="right-panel">
+              <div className="search-panel">
+                <div className="search-panel__results">
+                  <SearchBox
+                    className="searchbox"
+                    translations={{
+                      placeholder: 'search here...',
+                    }}
+                  />
+                  <div>
+                    <Hits hitComponent={Hit} />
+                  </div>
+                  <div className="pagination">
+                    <Pagination />
+                  </div>
                 </div>
               </div>
             </div>
@@ -55,32 +68,5 @@ class App extends Component {
     );
   }
 }
-
-function Hit(props) {
-  return (
-    <article>
-      <h1>
-        <Highlight attribute="url" hit={props.hit} />
-      </h1>
-      <h1>
-        <Highlight attribute="guide" hit={props.hit} />
-      </h1>
-      <h1>
-        <Highlight attribute="product" hit={props.hit} />
-      </h1>
-      <h1>
-        <Highlight attribute="title" hit={props.hit} />
-      </h1>
-      <h1>
-        <Highlight attribute="content" hit={props.hit} />
-      </h1>
-
-    </article>
-  );
-}
-
-Hit.propTypes = {
-  hit: PropTypes.object.isRequired,
-};
 
 export default App;
