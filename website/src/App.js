@@ -33,7 +33,7 @@ class App extends Component {
         </header>
 
         <div className="container">
-          <InstantSearch searchClient={searchClient} indexName="aws-doc-jp">
+          <InstantSearch searchClient={searchClient} indexName={process.env.REACT_APP_ALGOLIA_INDEX_NAME}>
             <div className="search-panel">
               <div className="search-panel__results">
                 <SearchBox
