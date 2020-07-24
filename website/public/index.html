@@ -7,15 +7,15 @@
   <meta name="theme-color" content="#000000">
 
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
-  <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+  <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
 
-  <!--
-    Do not use @7 in production, use a complete version like x.x.x, see website for latest version:
-    https://www.algolia.com/doc/guides/building-search-ui/installation/react/#load-the-style
-  -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7/themes/algolia-min.css">
+  <!-- Include only the reset -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.3.1/themes/reset-min.css" integrity="sha256-t2ATOGCtAIZNnzER679jwcFcKYfLlw01gli6F6oszk8=" crossorigin="anonymous">
+  <!-- or include the full Algolia theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.3.1/themes/algolia-min.css" integrity="sha256-HB49n/BZjuqiCtQQf49OdZn63XuKFaxcIHWf0HNKte8=" crossorigin="anonymous">
 
-  <title>website</title>
+
+  <title>AWS Doc Search</title>
 </head>
 
 <body>

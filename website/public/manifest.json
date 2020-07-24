@@ -1,9 +1,9 @@
 {
-  "short_name": "website",
-  "name": "website Sample",
+  "short_name": "awsdoc-ja-search",
+  "name": "aws doc ja search",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     }

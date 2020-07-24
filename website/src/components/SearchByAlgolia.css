@@ -1,0 +1,16 @@
+/* 
+Override algolia css
+https://www.algolia.com/doc/guides/building-search-ui/widgets/customize-an-existing-widget/react/#style-your-widgets
+*/
+
+.ais-SearchBox {
+  margin: 1em 0;
+}
+
+.ais-Hits-item {
+  margin: auto;
+  padding-bottom: ;
+  width: 100%;
+  border: none;
+  box-shadow: none;;
+}
