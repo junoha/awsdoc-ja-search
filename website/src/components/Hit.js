@@ -7,6 +7,17 @@ import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import moment from 'moment';
+
+const getUtcDateStr = dateStr => {
+  try {
+    const yyyymmddd = moment.utc(dateStr).format('yyyy/MM/DD');
+    const hhmmdd = moment.utc(dateStr).format('HH:mm:ss (UTC)');
+    return `${yyyymmddd} ${hhmmdd}`
+  } catch (error) {
+    return '';
+  }
+};
 
 const useStyles = makeStyles(theme => ({
   section1: {
@@ -41,9 +52,9 @@ function Hit(props) {
               </Grid>
               <Grid item={12} sm={6}>
                 <Typography variant='body2' color='inherit' className={classes.title} >last-modified</Typography>
-                <Typography variant='body2' color='inherit' >{props.hit.last_modified}</Typography>
+                <Typography variant='body2' color='inherit' >{getUtcDateStr(props.hit.last_modified)}</Typography>
                 <Typography variant='body2' color='inherit' className={classes.title} >crawled-at</Typography>
-                <Typography variant='body2' color='inherit' >{props.hit.crawled_at}</Typography>
+                <Typography variant='body2' color='inherit' >{getUtcDateStr(props.hit.crawled_at)}</Typography>
               </Grid>
             </Grid>
             <div className={classes.link}>
