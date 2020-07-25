@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Container from '@material-ui/core/Container';
 import indigo from '@material-ui/core/colors/indigo';
 import { makeStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
@@ -39,7 +40,7 @@ const App = () => {
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
         <Header />
-        <div className={classes.container} >
+        <Container className={classes.container}>
           <BrowserRouter>
             <Switch>
               <Route exact path='/'>
@@ -51,7 +52,7 @@ const App = () => {
               <Redirect path="*" to="/" />
             </Switch>
           </BrowserRouter>
-        </div>
+        </Container>
       </MuiThemeProvider >
     </>
   );

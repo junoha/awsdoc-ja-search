@@ -2,6 +2,8 @@ import React from 'react';
 import Hit from './Hit';
 import './SearchByAlgolia.css';
 import { makeStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
 
 import algoliasearch from 'algoliasearch/lite';
 import {
@@ -45,31 +47,31 @@ const App = () => {
 
   return (
     <InstantSearch searchClient={searchClient} indexName={process.env.REACT_APP_ALGOLIA_INDEX_NAME}>
-      <div className={classes.leftPanel}>
-        <ClearRefinements />
-        <h2>Product</h2>
-        <RefinementList attribute="product" showMore={true} showMoreLimit={30} />
-        <h2>Guide</h2>
-        <RefinementList attribute="guide" showMore={true} showMoreLimit={20} />
-        <Configure hitsPerPage={5} />
-      </div>
-      <div className={classes.rightPanel}>
-        <div className={classes.searchPanel}>
-          <div className={classes.searchPanel__results}>
-            <SearchBox
-              translations={{
-                placeholder: 'search here...',
-              }}
-            />
-            <div>
-              <Hits hitComponent={Hit} />
-            </div>
-            <div className={classes.pagination}>
-              <Pagination />
-            </div>
-          </div>
-        </div>
-      </div>
+      <Grid container spacing={1}>
+        <Grid item xs={12} sm={3}>
+          <ClearRefinements />
+          <h2>Product</h2>
+          <RefinementList attribute="product" showMore={true} showMoreLimit={30} />
+          <h2>Guide</h2>
+          <RefinementList attribute="guide" showMore={true} showMoreLimit={20} />
+          <Configure hitsPerPage={5} />
+        </Grid>
+        <Grid item xs={12} sm={9}>
+          <Container className={classes.searchPanel}>
+            <Container className={classes.searchPanel__results}>
+                <SearchBox
+                  translations={{
+                    placeholder: 'search here...',
+                  }}
+                />
+                <Hits hitComponent={Hit} />
+              <Container className={classes.pagination}>
+                <Pagination />
+              </Container>
+            </Container>
+          </Container>
+        </Grid>
+      </Grid>
     </InstantSearch>
   );
 }
