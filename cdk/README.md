@@ -25,9 +25,6 @@ AwsDocSearchStackDocCrawlerStackEE622384
 Deploy with CDK.
 ```shell
 $ cdk deploy AwsDocSearchStack -c s3BucketName=<s3 bucket> -c s3Prefix=<s3 prefix> -c semaphore=<semaphore>
-
-# example
-$ cdk deploy AwsDocSearchStack -c s3BucketName=aws-ohajun-work -c s3Prefix=misc/awsdoc-ja-search -c semaphore=20
 ```
 
 One shot run Task
