@@ -11,6 +11,7 @@ export class CrawlerStack extends cdk.NestedStack {
     // ECR
     const ecrAsset = new DockerImageAsset(this, 'CrawlerImage', {
       directory: '../doc-crawler',
+      repositoryName: 'awsdocsearch/crawler'
     });
 
     // IAM role
@@ -46,7 +47,7 @@ export class CrawlerStack extends cdk.NestedStack {
         'SEMAPHORE': props.semaphore.toString(),
       },
       logging: new ecs.AwsLogDriver({
-        streamPrefix: 'crawler'
+        streamPrefix: 'awsdocsearch'
       })
     });
 
