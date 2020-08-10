@@ -1,7 +1,10 @@
 import * as cdk from '@aws-cdk/core';
 import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
+import { Schedule } from '@aws-cdk/aws-autoscaling';
 import * as ecs from '@aws-cdk/aws-ecs';
+import { SubnetType } from '@aws-cdk/aws-ec2';
 import * as iam from '@aws-cdk/aws-iam';
+import { ScheduledFargateTask } from '@aws-cdk/aws-ecs-patterns';
 import { AwsDocSearchStackProps } from '../cdk-stack';
 
 export class CrawlerStack extends cdk.NestedStack {
@@ -49,6 +52,16 @@ export class CrawlerStack extends cdk.NestedStack {
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'awsdocsearch'
       })
+    });
+
+    new ScheduledFargateTask(this, 'CrawlerCronTask', {
+      schedule: Schedule.expression('cron(0 18 * * ? *)'),
+      scheduledFargateTaskDefinitionOptions: {
+        taskDefinition: taskDefinition
+      },
+      subnetSelection: {
+        subnetType: SubnetType.PUBLIC
+      }
     });
 
   }
