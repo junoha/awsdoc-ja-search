@@ -21,6 +21,8 @@ logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 BUCKET = os.environ.get("BUCKET")
 PREFIX = os.environ.get("PREFIX")
+TIMESTAMP = os.environ.get("TIMESTAMP")
+INPUT_PREFIX = PREFIX + "/" + TIMESTAMP + "/"
 
 
 def filter_data(target_path: str):
@@ -101,24 +103,25 @@ def main():
     """
     Main logic
     """
-    if BUCKET is None or PREFIX is None:
-        logger.error("BUCKET or PREFIX is None")
+    if BUCKET is None or PREFIX is None or TIMESTAMP is None:
+        logger.error("BUCKET or PREFIX or TIMESTAMP is None")
         return 1
 
     logger.info("BUCKET: {}".format(BUCKET))
     logger.info("PREFIX: {}".format(PREFIX))
+    logger.info("TIMESTAMP: {}".format(TIMESTAMP))
 
-    # Download gzip files to /tmp/PREFIX/
-    succeeded = s3util.download_dir(bucket=BUCKET, prefix=PREFIX, local="/tmp")
+    # Download gzip files to /tmp/INPUT_PREFIX
+    succeeded = s3util.download_dir(bucket=BUCKET, prefix=INPUT_PREFIX, local="/tmp")
     if succeeded is False:
         logger.error("S3 Download failed")
         return 1
     logger.info("S3 download complete")
 
-    # gunzip /tmp/PREFIX/*.gz
+    # gunzip /tmp/INPUT_PREFIX/*.gz
     try:
         subprocess.run(
-            "gunzip /tmp/{}/*.gz".format(PREFIX),
+            "gunzip /tmp/{}/*.gz".format(INPUT_PREFIX),
             shell=True,
             stdout=PIPE,
             stderr=PIPE,
@@ -126,12 +129,12 @@ def main():
         )
     except Exception:
         trace = traceback.format_exc()
-        logger.error("Error while gunzip /tmp/{}/*.gz".format(PREFIX))
+        logger.error("Error while gunzip /tmp/{}/*.gz".format(INPUT_PREFIX))
         logger.exception(trace)
         return 1
 
-    # Read /tmp/PREFIX jsonline and filter and append list
-    filtered_data = filter_data("/tmp/{}".format(PREFIX))
+    # Read /tmp/INPUT_PREFIX jsonline and filter and append list
+    filtered_data = filter_data("/tmp/{}".format(INPUT_PREFIX))
     logger.info("Index size: {}".format(len(filtered_data)))
 
     # Create and update Algolia index every 1000 records
@@ -140,7 +143,18 @@ def main():
         algolia.save(split_data)
         logger.info("uploaded")
 
-    logger.info("upload complete")
+    logger.info("algolia index save complete")
+
+    # Upload filtered data to S3://BUCKET/PREFIX/dest/filtered_data_TIMESTAMP.jsonl.gz
+    try:
+        filtered_data_bytes = "\n".join([json.dumps(d) for d in filtered_data]).encode(
+            "utf-8"
+        )
+        key = "{}/{}/filtered_data_{}.jsonl.gz".format(PREFIX, "dest", TIMESTAMP)
+        s3util.upload_file(BUCKET, key, filtered_data_bytes)
+        logger.info("s3 upload complete")
+    except Exception as e:
+        logger.exception("Error while s3 upload", exc_info=e)
 
 
 if __name__ == "__main__":
