@@ -30,7 +30,8 @@ export class CrawlerStack extends cdk.NestedStack {
       roleName: 'ecs-crawler-task-role',
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess')
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMFullAccess')
       ],
     });
 
