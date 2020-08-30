@@ -15,6 +15,7 @@ import jsonlines
 
 import s3util
 from helper import calc_time, to_isoformat, is_ok_url
+import ssmutil
 
 # requests retry backoff config
 s = requests.Session()
@@ -161,11 +162,20 @@ def get_all_docs(sitemap_urls):
         remain_count -= 1
 
 
-def init_log():
+def begin():
     logger.info("TIMESTAMP: {}".format(TIMESTAMP))
     logger.info("BUCKET: {}".format(BUCKET))
     logger.info("PREFIX: {}".format(PREFIX))
     logger.info("SEMAPHORE: {}".format(SEMAPHORE))
+
+    ssmutil.put_param("/task/aws-doc-search/BUCKET", BUCKET)
+    ssmutil.put_param("/task/aws-doc-search/PREFIX", PREFIX)
+    ssmutil.put_param("/task/aws-doc-search/TIMESTAMP", TIMESTAMP)
+    ssmutil.put_param("/task/aws-doc-search/status", "RUNNING")
+
+
+def end():
+    ssmutil.put_param("/task/aws-doc-search/status", "DONE")
 
 
 @calc_time
@@ -173,7 +183,7 @@ def main():
     """
     Main logic
     """
-    init_log()
+    begin()
 
     root_sitemap = s.get(ROOT_SITEMAP_URL)
     root = ET.fromstring(root_sitemap.text.encode("utf-8"))
@@ -185,6 +195,8 @@ def main():
     logger.info("Number of sitemap.xml: {}".format(len(service_sitemap_urls_ja)))
 
     get_all_docs(service_sitemap_urls_ja)
+
+    end()
 
 
 if __name__ == "__main__":
