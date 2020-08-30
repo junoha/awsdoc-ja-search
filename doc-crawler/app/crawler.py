@@ -6,12 +6,21 @@ import os
 import traceback
 
 import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+
 import aiohttp
 import xml.etree.ElementTree as ET
 import jsonlines
 
 import s3util
 from helper import calc_time, to_isoformat, is_ok_url
+
+# requests retry backoff config
+s = requests.Session()
+retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+s.mount("https://", HTTPAdapter(max_retries=retries))
+s.mount("http://", HTTPAdapter(max_retries=retries))
 
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=formatter)
@@ -111,7 +120,15 @@ def get_all_docs(sitemap_urls):
             remain_count -= 1
             continue
 
-        service_sitemap = requests.get(service_sitemap_url)
+        service_sitemap = s.get(service_sitemap_url)
+        if service_sitemap.status_code != 200:
+            logger.warning(
+                "failed to get this sitemap.xml due to {}({})".format(
+                    service_sitemap.status_code, service_sitemap.reason
+                )
+            )
+            continue
+
         service_root = ET.fromstring(service_sitemap.text.encode("utf-8"))
         service_urls = [child[0].text.strip() for child in service_root]
 
@@ -158,7 +175,7 @@ def main():
     """
     init_log()
 
-    root_sitemap = requests.get(ROOT_SITEMAP_URL)
+    root_sitemap = s.get(ROOT_SITEMAP_URL)
     root = ET.fromstring(root_sitemap.text.encode("utf-8"))
     service_sitemap_urls = [child[0].text.strip() for child in root]
     # Change EN sitemap to ja_jp
