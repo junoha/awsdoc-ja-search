@@ -5,7 +5,7 @@ import boto3
 
 logger = logging.getLogger("crawler").getChild(__name__)
 
-ssm = boto3.client("ssm")
+ssm = boto3.client("ssm", region_name="ap-northeast-1")
 
 
 def get_param(key: str):
