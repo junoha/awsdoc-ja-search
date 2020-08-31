@@ -13,8 +13,11 @@ async function main(event, context) {
   const PREFIX = await get('/task/aws-doc-search/PREFIX');
   const TIMESTAMP = await get('/task/aws-doc-search/TIMESTAMP');
   const status = await get('/task/aws-doc-search/status');
+  const APPLICATION_ID = await get('/task/aws-doc-search/APPLICATION_ID');
+  const ADMIN_API_KEY = await get('/task/aws-doc-search/ADMIN_API_KEY');
+  const INDEX_NAME = await get('/task/aws-doc-search/INDEX_NAME');
 
-  const response = { BUCKET, PREFIX, TIMESTAMP, status };
+  const response = { BUCKET, PREFIX, TIMESTAMP, status, APPLICATION_ID, ADMIN_API_KEY, INDEX_NAME };
   console.log(response);
 
   return response;

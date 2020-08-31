@@ -27,6 +27,9 @@
     "@aws-cdk/aws-ecs": "^1.57.0",
     "@aws-cdk/aws-ecs-patterns": "^1.57.0",
     "@aws-cdk/aws-iam": "^1.57.0",
+    "@aws-cdk/aws-lambda": "^1.57.0",
+    "@aws-cdk/aws-stepfunctions": "^1.57.0",
+    "@aws-cdk/aws-stepfunctions-tasks": "^1.57.0",
     "@aws-cdk/core": "1.57.0",
     "source-map-support": "^0.5.16"
   }
