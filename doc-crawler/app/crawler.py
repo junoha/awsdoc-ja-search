@@ -121,7 +121,15 @@ def get_all_docs(sitemap_urls):
             remain_count -= 1
             continue
 
-        service_sitemap = s.get(service_sitemap_url)
+        service_sitemap = None
+        try:
+            service_sitemap = s.get(service_sitemap_url)
+        except Exception:
+            trace = traceback.format_exc()
+            logger.error("Error while GET {}".format(service_sitemap_url))
+            logger.exception(trace)
+            continue
+
         if service_sitemap.status_code != 200:
             logger.warning(
                 "failed to get this sitemap.xml due to {}({})".format(
