@@ -1,9 +1,11 @@
 import * as cdk from '@aws-cdk/core';
 import * as ecs from '@aws-cdk/aws-ecs';
 import * as iam from '@aws-cdk/aws-iam';
+import { Schedule } from '@aws-cdk/aws-events';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as sfn from '@aws-cdk/aws-stepfunctions';
 import * as sfn_tasks from '@aws-cdk/aws-stepfunctions-tasks';
+import { EventsRuleToStepFunction } from '@aws-solutions-constructs/aws-events-rule-step-function';
 
 import { CrawlerStack } from './stack/crawler-stack';
 import { IndexerStack } from './stack/indexer-stack';
@@ -81,10 +83,14 @@ export class AwsDocSearchStack extends cdk.Stack {
         .next(getParameterFuncState)
         .next(indexerTaskState);
 
-      new sfn.StateMachine(this, 'AwsDocSearch', {
-        definition: chain
+      new EventsRuleToStepFunction(this, 'AwsDocSearchCron', {
+        stateMachineProps: {
+          definition: chain
+        },
+        eventRuleProps: {
+          schedule: Schedule.expression('cron(0 18 * * ? *)')
+        }
       });
-
     }
 
   }
