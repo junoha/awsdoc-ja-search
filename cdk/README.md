@@ -26,12 +26,3 @@ Deploy with CDK.
 ```shell
 $ cdk deploy AwsDocSearchStack -c s3BucketName=<s3 bucket> -c s3Prefix=<s3 prefix> -c semaphore=<semaphore>
 ```
-
-One shot run Task
-```shell
-$ aws ecs run-task \
---region ${AWS_DEFAULT_REGION} \
---launch-type FARGATE \
---network-configuration "awsvpcConfiguration={subnets=[${SUBNET_ID}],securityGroups=[${SECURITY_GROUP_ID}],assignPublicIp=ENABLED}" \
---task-definition ${TASK_NAME}
-```
