@@ -62,12 +62,12 @@ export class AwsDocSearchStack extends cdk.Stack {
         containerOverrides: [{
           containerDefinition: indexerStack.containerDefinition,
           environment: [
-            { name: 'BUCKET', value: '$.BUCKET' },
-            { name: 'PREFIX', value: '$.PREFIX' },
-            { name: 'TIMESTAMP', value: '$.TIMESTAMP' },
-            { name: 'APPLICATION_ID', value: '$.APPLICATION_ID' },
-            { name: 'ADMIN_API_KEY', value: '$.ADMIN_API_KEY' },
-            { name: 'INDEX_NAME', value: '$.INDEX_NAME' },
+            { name: 'BUCKET', value: sfn.JsonPath.stringAt('$.BUCKET') },
+            { name: 'PREFIX', value: sfn.JsonPath.stringAt('$.PREFIX') },
+            { name: 'TIMESTAMP', value: sfn.JsonPath.stringAt('$.TIMESTAMP') },
+            { name: 'APPLICATION_ID', value: sfn.JsonPath.stringAt('$.APPLICATION_ID') },
+            { name: 'ADMIN_API_KEY', value: sfn.JsonPath.stringAt('$.ADMIN_API_KEY') },
+            { name: 'INDEX_NAME', value: sfn.JsonPath.stringAt('$.INDEX_NAME') },
           ]
         }]
       });
