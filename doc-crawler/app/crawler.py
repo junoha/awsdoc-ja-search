@@ -6,12 +6,22 @@ import os
 import traceback
 
 import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+
 import aiohttp
 import xml.etree.ElementTree as ET
 import jsonlines
 
 import s3util
 from helper import calc_time, to_isoformat, is_ok_url
+import ssmutil
+
+# requests retry backoff config
+s = requests.Session()
+retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+s.mount("https://", HTTPAdapter(max_retries=retries))
+s.mount("http://", HTTPAdapter(max_retries=retries))
 
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=formatter)
@@ -22,7 +32,8 @@ ROOT_SITEMAP_URL = "https://docs.aws.amazon.com/sitemap_index.xml"
 # yyyymmddhhmmss (UTC)
 TIMESTAMP = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 BUCKET = os.environ.get("BUCKET")
-PREFIX = os.environ.get("PREFIX") + "/" + TIMESTAMP
+PREFIX_BASE = os.environ.get("PREFIX")
+PREFIX = PREFIX_BASE + "/" + TIMESTAMP
 SEMAPHORE = int(os.environ.get("SEMAPHORE", 30))
 
 
@@ -111,7 +122,23 @@ def get_all_docs(sitemap_urls):
             remain_count -= 1
             continue
 
-        service_sitemap = requests.get(service_sitemap_url)
+        service_sitemap = None
+        try:
+            service_sitemap = s.get(service_sitemap_url)
+        except Exception:
+            trace = traceback.format_exc()
+            logger.error("Error while GET {}".format(service_sitemap_url))
+            logger.exception(trace)
+            continue
+
+        if service_sitemap.status_code != 200:
+            logger.warning(
+                "failed to get this sitemap.xml due to {}({})".format(
+                    service_sitemap.status_code, service_sitemap.reason
+                )
+            )
+            continue
+
         service_root = ET.fromstring(service_sitemap.text.encode("utf-8"))
         service_urls = [child[0].text.strip() for child in service_root]
 
@@ -144,11 +171,20 @@ def get_all_docs(sitemap_urls):
         remain_count -= 1
 
 
-def init_log():
+def begin():
     logger.info("TIMESTAMP: {}".format(TIMESTAMP))
     logger.info("BUCKET: {}".format(BUCKET))
-    logger.info("PREFIX: {}".format(PREFIX))
+    logger.info("PREFIX: {}".format(PREFIX_BASE))
     logger.info("SEMAPHORE: {}".format(SEMAPHORE))
+
+    ssmutil.put_param("/task/aws-doc-search/BUCKET", BUCKET)
+    ssmutil.put_param("/task/aws-doc-search/PREFIX", PREFIX_BASE)
+    ssmutil.put_param("/task/aws-doc-search/TIMESTAMP", TIMESTAMP)
+    ssmutil.put_param("/task/aws-doc-search/status", "RUNNING")
+
+
+def end():
+    ssmutil.put_param("/task/aws-doc-search/status", "DONE")
 
 
 @calc_time
@@ -156,9 +192,9 @@ def main():
     """
     Main logic
     """
-    init_log()
+    begin()
 
-    root_sitemap = requests.get(ROOT_SITEMAP_URL)
+    root_sitemap = s.get(ROOT_SITEMAP_URL)
     root = ET.fromstring(root_sitemap.text.encode("utf-8"))
     service_sitemap_urls = [child[0].text.strip() for child in root]
     # Change EN sitemap to ja_jp
@@ -168,6 +204,8 @@ def main():
     logger.info("Number of sitemap.xml: {}".format(len(service_sitemap_urls_ja)))
 
     get_all_docs(service_sitemap_urls_ja)
+
+    end()
 
 
 if __name__ == "__main__":

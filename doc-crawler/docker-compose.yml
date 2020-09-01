@@ -1,0 +1,19 @@
+# Use Environment variables in ".env" file, check "docker-compose config"
+# https://docs.docker.com/compose/environment-variables/#set-environment-variables-with-docker-compose-run
+# Local test
+# https://aws.amazon.com/blogs/compute/a-guide-to-locally-testing-containers-with-amazon-ecs-local-endpoints-and-docker-compose/
+
+version: "3"
+services:
+  doc-crawler:
+    image: ${IMAGE_NAME}
+    container_name: crawler
+    environment:
+      BUCKET: ${BUCKET}
+      PREFIX: ${PREFIX}
+      SEMAPHORE: ${SEMAPHORE}
+    # If you test locally, uncomment
+    #   HOME: "/home"
+    #   AWS_PROFILE: "default"
+    # volumes:
+    #   - $HOME/.aws:/home/.aws
