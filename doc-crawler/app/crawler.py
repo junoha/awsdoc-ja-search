@@ -32,7 +32,8 @@ ROOT_SITEMAP_URL = "https://docs.aws.amazon.com/sitemap_index.xml"
 # yyyymmddhhmmss (UTC)
 TIMESTAMP = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 BUCKET = os.environ.get("BUCKET")
-PREFIX = os.environ.get("PREFIX") + "/" + TIMESTAMP
+PREFIX_BASE = os.environ.get("PREFIX")
+PREFIX = PREFIX_BASE + "/" + TIMESTAMP
 SEMAPHORE = int(os.environ.get("SEMAPHORE", 30))
 
 
@@ -173,11 +174,11 @@ def get_all_docs(sitemap_urls):
 def begin():
     logger.info("TIMESTAMP: {}".format(TIMESTAMP))
     logger.info("BUCKET: {}".format(BUCKET))
-    logger.info("PREFIX: {}".format(PREFIX))
+    logger.info("PREFIX: {}".format(PREFIX_BASE))
     logger.info("SEMAPHORE: {}".format(SEMAPHORE))
 
     ssmutil.put_param("/task/aws-doc-search/BUCKET", BUCKET)
-    ssmutil.put_param("/task/aws-doc-search/PREFIX", PREFIX)
+    ssmutil.put_param("/task/aws-doc-search/PREFIX", PREFIX_BASE)
     ssmutil.put_param("/task/aws-doc-search/TIMESTAMP", TIMESTAMP)
     ssmutil.put_param("/task/aws-doc-search/status", "RUNNING")
 
