@@ -124,7 +124,8 @@ def get_all_docs(sitemap_urls):
 
         service_sitemap = None
         try:
-            service_sitemap = s.get(service_sitemap_url)
+            # Some sitemap redirects directory to one document url so stop redirect
+            service_sitemap = s.get(service_sitemap_url, allow_redirects=False)
         except Exception:
             trace = traceback.format_exc()
             logger.error("Error while GET {}".format(service_sitemap_url))
