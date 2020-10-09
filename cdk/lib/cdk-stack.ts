@@ -45,6 +45,9 @@ export class AwsDocSearchStack extends cdk.Stack {
         handler: 'getParameter.handler',
         role: lambdaRole,
       });
+      // Not work?
+      // getParameterFunc.node.applyAspect(new cdk.Tag('auto-delete', 'no'));
+      // cdk.Tag.add(getParameterFunc, 'auto-delete', 'no');
 
       /**
        * Step Functions

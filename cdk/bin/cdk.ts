@@ -34,4 +34,7 @@ const props = {
   semaphore: semaphoreInt
 };
 
-new AwsDocSearchStack(app, 'AwsDocSearchStack', props);
+const stack = new AwsDocSearchStack(app, 'AwsDocSearchStack', props);
+cdk.Tag.add(stack,'auto-delete','no', {
+  includeResourceTypes: ['AWS::Lambda::Function'],
+});
