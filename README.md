@@ -29,11 +29,83 @@ It runs the following AWS Step Function state machine by CloudWatch Events rule 
 
 ## Usage <a name = "usage"></a>
 
-Create resources by CDK.
+### Create resources by CDK.
 
 ```
 $ cd cdk
 $ cdk deploy AwsDocSearchStack -c s3BucketName=<s3 bucket> -c s3Prefix=<s3 prefix> -c semaphore=<semaphore>
+```
+
+### Create Algolia index
+
+This is current settings of aws doc index. Use [algolia-cli](https://github.com/algolia/algolia-cli#usage).
+
+```json
+$ algolia getsettings -a <algoliaAppId> -k <algoliaApiKey> -n <algoliaIndexName> | jq -r .
+{
+  "minWordSizefor1Typo": 4,
+  "minWordSizefor2Typos": 8,
+  "hitsPerPage": 20,
+  "maxValuesPerFacet": 100,
+  "version": 2,
+  "attributesToIndex": [
+    "unordered(content)"
+  ],
+  "numericAttributesToIndex": null,
+  "attributesToRetrieve": [
+    "crawled_at",
+    "guide",
+    "last_modified",
+    "product",
+    "title",
+    "url"
+  ],
+  "unretrievableAttributes": null,
+  "optionalWords": null,
+  "queryLanguages": [
+    "ja",
+    "en"
+  ],
+  "attributesForFaceting": [
+    "guide",
+    "product"
+  ],
+  "attributesToSnippet": [
+    "content:100"
+  ],
+  "attributesToHighlight": [],
+  "paginationLimitedTo": 1000,
+  "attributeForDistinct": null,
+  "exactOnSingleWordQuery": "word",
+  "ranking": [
+    "typo",
+    "geo",
+    "words",
+    "filters",
+    "proximity",
+    "attribute",
+    "exact",
+    "custom"
+  ],
+  "customRanking": [
+    "desc(content)",
+    "desc(product)"
+  ],
+  "separatorsToIndex": "!#()[]{}*+-_一,:;<>?@/\\^|%&~",
+  "removeWordsIfNoResults": "none",
+  "queryType": "prefixLast",
+  "highlightPreTag": "<em>",
+  "highlightPostTag": "</em>",
+  "snippetEllipsisText": "....",
+  "alternativesAsExact": [
+    "ignorePlurals",
+    "singleWordSynonym"
+  ],
+  "indexLanguages": [
+    "ja",
+    "en"
+  ]
+}
 ```
 
 
