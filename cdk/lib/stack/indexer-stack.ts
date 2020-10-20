@@ -37,7 +37,7 @@ export class IndexerStack extends cdk.NestedStack {
 
     // Fargate
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'IndexerTaskdef', {
-      memoryLimitMiB: 1024,
+      memoryLimitMiB: 2048,
       cpu: 512,
       executionRole: executionRole,
       taskRole: taskRole,
