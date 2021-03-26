@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
 import { AwsDocSearchStack } from '../lib/cdk-stack';
+import { Tags } from '@aws-cdk/core';
 
 const app = new cdk.App();
 
@@ -35,6 +36,6 @@ const props = {
 };
 
 const stack = new AwsDocSearchStack(app, 'AwsDocSearchStack', props);
-cdk.Tag.add(stack,'auto-delete','no', {
+Tags.of(stack).add('auto-delete', 'no', {
   includeResourceTypes: ['AWS::Lambda::Function'],
 });
