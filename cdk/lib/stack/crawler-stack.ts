@@ -37,8 +37,8 @@ export class CrawlerStack extends cdk.NestedStack {
 
     // Fargate
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'CrawlerTaskdef', {
-      memoryLimitMiB: 1024,
-      cpu: 512,
+      memoryLimitMiB: 8192,
+      cpu: 1024,
       executionRole: executionRole,
       taskRole: taskRole,
     });
