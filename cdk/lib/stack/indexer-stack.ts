@@ -31,10 +31,24 @@ export class IndexerStack extends cdk.NestedStack {
       roleName: 'ecs-indexer-task-role',
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess')
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3ReadOnlyAccess')
       ],
-    });
-
+      inlinePolicies: {
+        'docIndexerPolicy': new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: [
+                's3:Put*',
+                'ssm:GetParameter',
+                'ssm:PutParameter'
+              ],
+              resources: ['*']
+            })
+          ]
+        })
+      }
+    });    
     // Fargate
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'IndexerTaskdef', {
       memoryLimitMiB: 2048,
