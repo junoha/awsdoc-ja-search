@@ -57,6 +57,7 @@ def is_ok_url(url: str):
         "sdkfornet",
         "sdkfornet1",
         "xray-sdk-for-java",
+        "cdk"
     ]
 
     for ng in ng_list:
