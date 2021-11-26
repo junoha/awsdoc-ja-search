@@ -46,7 +46,7 @@ export class AwsDocSearchStack extends cdk.Stack {
       });
 
       const getParameterFunc = new lambda.Function(this, 'GetParameterStoreHandler', {
-        runtime: lambda.Runtime.NODEJS_12_X,
+        runtime: lambda.Runtime.NODEJS_14_X,
         code: lambda.Code.fromAsset('lambda'),
         handler: 'getParameter.handler',
         role: lambdaRole,
