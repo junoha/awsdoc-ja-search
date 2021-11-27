@@ -29,16 +29,27 @@ export class CrawlerStack extends cdk.NestedStack {
     const taskRole = new iam.Role(this, 'EcsTaskRole', {
       roleName: 'ecs-crawler-task-role',
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMFullAccess')
-      ],
+      inlinePolicies: {
+        'docCrawlerPolicy': new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: [
+                's3:Put*',
+                'ssm:GetParameter',
+                'ssm:PutParameter'
+              ],
+              resources: ['*']
+            })
+          ]
+        })
+      }
     });
 
     // Fargate
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'CrawlerTaskdef', {
-      memoryLimitMiB: 1024,
-      cpu: 512,
+      memoryLimitMiB: 4096,
+      cpu: 1024,
       executionRole: executionRole,
       taskRole: taskRole,
     });

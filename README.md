@@ -24,6 +24,7 @@ It runs the following AWS Step Function state machine by CloudWatch Events rule 
 - `CrawlerTask` is Fargate task which crawls all AWS Documents
 - `GetParameter` is Lambda function which passes result of `CrawlerTask`
 - `IndexerTask` is Fargate task which creates Algolia index
+- `snsState` is notification when error occurs
 
 ![](img/stepfunctions_graph.png)
 
@@ -33,7 +34,11 @@ It runs the following AWS Step Function state machine by CloudWatch Events rule 
 
 ```
 $ cd cdk
-$ cdk deploy AwsDocSearchStack -c s3BucketName=<s3 bucket> -c s3Prefix=<s3 prefix> -c semaphore=<semaphore>
+$ npx cdk deploy AwsDocSearchStack \
+-c s3BucketName=<s3 bucket> \
+-c s3Prefix=<s3 prefix> \
+-c semaphore=<semaphore> \
+-c snsTopicArn=<sns topic ARN>
 ```
 
 ### Create Algolia index
