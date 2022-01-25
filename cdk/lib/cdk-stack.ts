@@ -91,7 +91,7 @@ export class AwsDocSearchStack extends cdk.Stack {
       const notificationTopic = Topic.fromTopicArn(this, 'notificationTopic', props.snsTopicArn);
       const snsState = new sfn_tasks.SnsPublish(this, 'snsState', {
         topic: notificationTopic,
-        message: sfn.TaskInput.fromJsonPathAt('$.message')
+        message: sfn.TaskInput.fromJsonPathAt('$')
       });
 
       const onError: sfn.CatchProps = {
