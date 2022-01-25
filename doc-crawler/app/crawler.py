@@ -198,10 +198,7 @@ def main():
     root_sitemap = s.get(ROOT_SITEMAP_URL)
     root = ET.fromstring(root_sitemap.text.encode("utf-8"))
     service_sitemap_urls = [child[0].text.strip() for child in root]
-    # Change EN sitemap to ja_jp
-    service_sitemap_urls_ja = [
-        url.replace(".com/", ".com/ja_jp/") for url in service_sitemap_urls
-    ]
+    service_sitemap_urls_ja = list(filter(lambda url: "/ja_jp/" in url, service_sitemap_urls))
     logger.info("Number of sitemap.xml: {}".format(len(service_sitemap_urls_ja)))
 
     get_all_docs(service_sitemap_urls_ja)
